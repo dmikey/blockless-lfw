@@ -5,11 +5,25 @@ importScripts(
 );
 
 let fsholder = {};
+let wasmModule = null;
+let fs = null;
 addEventListener("fetch", (e) => {
-  //   const { pathname } = new URL(e.request.url);
-  //   if (!pathname.startsWith(path)) return;
+  const wasi = new wasijs.default({
+    args: [],
+    env: {
+      BLS_REQUEST_METHOD: "GET",
+      BLS_REQUEST_PATH: "/",
+      BLS_REQUEST_QUERY: "",
+    },
+    bindings: { ...wasibrowserbindings.default, fs },
+  });
 
-  //   console.log("hello");
+  WebAssembly.instantiate(wasmModule, {
+    wasi_snapshot_preview1: wasi.wasiImport,
+  }).then((wasmInstance) => {
+    wasi.start(wasmInstance);
+  });
+
   e.respondWith(
     new Response("<h1>Hello!</h1>", {
       headers: { "Content-Type": "text/html" },
@@ -33,7 +47,7 @@ addEventListener("install", (event) => {
     }
   );
 
-  var fs = fsholder.require("fs");
+  fs = fsholder.require("fs");
 
   // blockless stuff here
   fs.writeSync = (fd, buffer, offset, length, position, callback) => {
@@ -44,25 +58,9 @@ addEventListener("install", (event) => {
     }
   };
 
-  const wasi = new wasijs.default({
-    args: [],
-    env: {
-      BLS_REQUEST_METHOD: "GET",
-      BLS_REQUEST_PATH: "/",
-      BLS_REQUEST_QUERY: "",
-    },
-    bindings: { ...wasibrowserbindings.default, fs },
+  WebAssembly.compileStreaming(fetch("foo/build/foo.wasm")).then((wasm) => {
+    wasmModule = wasm;
   });
-
-  let wasm = WebAssembly.compileStreaming(fetch("foo/build/foo.wasm"))
-    .then((wasm) => {
-      return WebAssembly.instantiate(wasm, {
-        wasi_snapshot_preview1: wasi.wasiImport,
-      });
-    })
-    .then((module) => {
-      wasi.start(module);
-    });
 
   event.waitUntil(skipWaiting());
 });
