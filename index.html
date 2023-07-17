@@ -2,7 +2,20 @@
 <html>
   <head>
     <title>blockless : local first web</title>
-    <script src="browserbindings.js"></script>
+    <script type="module">
+      navigator.serviceWorker.register("sw.js");
+
+      setTimeout(async () => {
+        const res = await fetch("api/hello", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name }),
+        });
+      }, 1000);
+    </script>
+    <!-- <script src="browserbindings.js"></script>
     <script src="
 https://cdn.jsdelivr.net/npm/browserfs@1.4.3/dist/browserfs.min.js
 "></script>
@@ -58,7 +71,7 @@ https://cdn.jsdelivr.net/npm/browserfs@1.4.3/dist/browserfs.min.js
         .then((module) => {
           wasi.start(module);
         });
-    </script>
+    </script> -->
   </head>
   <body></body>
 </html>
