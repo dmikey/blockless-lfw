@@ -2,76 +2,14 @@
 <html>
   <head>
     <title>blockless : local first web</title>
-    <script type="module">
+    <script>
       navigator.serviceWorker.register("sw.js");
-
-      setTimeout(async () => {
-        const res = await fetch("api/hello", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name }),
-        });
-      }, 1000);
     </script>
-    <!-- <script src="browserbindings.js"></script>
-    <script src="
-https://cdn.jsdelivr.net/npm/browserfs@1.4.3/dist/browserfs.min.js
-"></script>
-    <script>
-      BrowserFS.install(window);
-      // Configures BrowserFS to use the LocalStorage file system.
-      BrowserFS.configure(
-        {
-          fs: "LocalStorage",
-        },
-        function (e) {
-          if (e) {
-            // An error happened!
-            throw e;
-          }
-          // Otherwise, BrowserFS is ready-to-use!
-        }
-      );
-    </script>
+    <!-- first load needs a little bit of finesse -->
+    <script src="browserbindings.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browserfs@1.4.3/dist/browserfs.min.js"></script>
     <script src="wasijs.js"></script>
-
-    <script>
-      var fs = require("fs");
-
-      // blockless stuff here
-      fs.writeSync = (fd, buffer, offset, length, position, callback) => {
-        var string = new TextDecoder().decode(buffer);
-        document.body.innerHTML += string;
-        if (callback) {
-          callback(null, length);
-        }
-      };
-
-      //GET THE BROWSER QUERY STRING
-      const queryString = window.location.search;
-
-      const wasi = new wasijs.default({
-        args: [],
-        env: {
-          BLS_REQUEST_METHOD: "GET",
-          BLS_REQUEST_PATH: "/",
-          BLS_REQUEST_QUERY: queryString,
-        },
-        bindings: { ...wasibrowserbindings.default, fs },
-      });
-
-      let wasm = WebAssembly.compileStreaming(fetch("foo/build/foo.wasm"))
-        .then((wasm) => {
-          return WebAssembly.instantiate(wasm, {
-            wasi_snapshot_preview1: wasi.wasiImport,
-          });
-        })
-        .then((module) => {
-          wasi.start(module);
-        });
-    </script> -->
+    <script src="blockless_lfw.js"></script>
   </head>
   <body></body>
 </html>
