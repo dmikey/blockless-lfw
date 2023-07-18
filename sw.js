@@ -2,10 +2,13 @@ importScripts("wasijs.js");
 importScripts("browserbindings.js");
 importScripts("browserfs.min.js");
 
+// holding some of the application loading
 let fsholder = {};
 let wasmModule = null;
 let fs = null;
 
+// singleton store for indexedDB to hold service worker state
+// https://github.com/jakearchibald/svgomg/blob/main/src/js/utils/storage.js#L5
 const idbKeyval = (() => {
   let dbInstance;
 
@@ -63,12 +66,14 @@ const idbKeyval = (() => {
   };
 })();
 
+// hook the fetch event to pass into the WASM module
 addEventListener("fetch", async (e) => {
+  const url = new URL(e.request.url);
   const wasi = new wasijs.default({
     args: [],
     env: {
       BLS_REQUEST_METHOD: "GET",
-      BLS_REQUEST_PATH: "/",
+      BLS_REQUEST_PATH: url.pathname,
       BLS_REQUEST_QUERY: "",
     },
     bindings: { ...wasibrowserbindings.default, fs },
@@ -80,6 +85,7 @@ addEventListener("fetch", async (e) => {
     wasi.start(wasmInstance);
   });
 
+  // wait until the response is set before resolving promise to service worker
   const checkCondition = () => {
     const p = new Promise(async (resolve, reject) => {
       while (true) {
@@ -97,7 +103,8 @@ addEventListener("fetch", async (e) => {
     });
     return p;
   };
-  // todo: find out why this fires twice
+
+  // todo: add route matching
   fs.writeSync = async (fd, buffer, offset, length, position, callback) => {
     let responseString = new TextDecoder().decode(buffer);
     if (responseString.trim().length > 0) {
@@ -108,15 +115,17 @@ addEventListener("fetch", async (e) => {
     }
   };
 
+  // resolve with the response
   e.respondWith(
     (async () => {
       e.waitUntil(checkCondition);
-      const stuff = await checkCondition();
-      return stuff;
+      const response = await checkCondition();
+      return response;
     })()
   );
 });
 
+// setup the wasm environment
 addEventListener("install", (event) => {
   BrowserFS.install(fsholder);
   // Configures BrowserFS to use the LocalStorage file system.
@@ -142,6 +151,7 @@ addEventListener("install", (event) => {
   event.waitUntil(skipWaiting());
 });
 
+// take control of the page
 addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });

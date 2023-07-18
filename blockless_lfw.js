@@ -47,12 +47,13 @@ fs.writeSync = (fd, buffer, offset, length, position, callback) => {
 
 //GET THE BROWSER QUERY STRING
 const queryString = window.location.search;
+const url = new URL(location.href);
 
 const wasi = new wasijs.default({
   args: [],
   env: {
     BLS_REQUEST_METHOD: "GET",
-    BLS_REQUEST_PATH: "/",
+    BLS_REQUEST_PATH: url.pathname,
     BLS_REQUEST_QUERY: queryString,
   },
   bindings: { ...wasibrowserbindings.default, fs },

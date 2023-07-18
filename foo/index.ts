@@ -1,4 +1,8 @@
-import { Console } from "as-wasi/assembly";
+import { Console, Environ } from "as-wasi/assembly";
+
+const env = new Environ();
+
+let path = env.get("BLS_REQUEST_PATH");
 
 var html = `<!DOCTYPE html>
 <html>
@@ -9,8 +13,13 @@ body, html{background:#000;color:#fff;padding:0;margin:0}
 </style>
 </head>
 <body>
-<h1>Hi, world!</h1>
-<p>asdasds</p>
+<h1>Hi, mnew version!</h1>
+<p>${path as String}</p>
 </body>
 </html>`;
-Console.log(html);
+
+if (path == "/") {
+  Console.log(html);
+} else {
+  Console.log("404");
+}
