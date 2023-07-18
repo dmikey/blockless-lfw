@@ -7,7 +7,7 @@ importScripts(
 let fsholder = {};
 let wasmModule = null;
 let fs = null;
-addEventListener("fetch", (e) => {
+addEventListener("fetch", async (e) => {
   const wasi = new wasijs.default({
     args: [],
     env: {
@@ -24,11 +24,18 @@ addEventListener("fetch", (e) => {
     wasi.start(wasmInstance);
   });
 
-  e.respondWith(
-    new Response("<h1>Hello!</h1>", {
-      headers: { "Content-Type": "text/html" },
-    })
-  );
+  fs.writeSync = (fd, buffer, offset, length, position, callback) => {
+    let responseString = new TextDecoder().decode(buffer);
+    e.respondWith(
+      new Response(responseString, {
+        headers: { "Content-Type": "text/html" },
+      })
+    );
+
+    if (callback) {
+      callback(null, length);
+    }
+  };
 });
 
 addEventListener("install", (event) => {
@@ -48,15 +55,6 @@ addEventListener("install", (event) => {
   );
 
   fs = fsholder.require("fs");
-
-  // blockless stuff here
-  fs.writeSync = (fd, buffer, offset, length, position, callback) => {
-    var string = new TextDecoder().decode(buffer);
-    console.log(string);
-    if (callback) {
-      callback(null, length);
-    }
-  };
 
   WebAssembly.compileStreaming(fetch("foo/build/foo.wasm")).then((wasm) => {
     wasmModule = wasm;
