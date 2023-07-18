@@ -1,8 +1,6 @@
 importScripts("wasijs.js");
 importScripts("browserbindings.js");
-importScripts(
-  "https://cdn.jsdelivr.net/npm/browserfs@1.4.3/dist/browserfs.min.js"
-);
+importScripts("browserfs.min.js");
 
 let fsholder = {};
 let wasmModule = null;

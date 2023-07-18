@@ -18,8 +18,6 @@ fs.writeSync = (fd, buffer, offset, length, position, callback) => {
   const parser = new DOMParser();
   const htmlDoc = parser.parseFromString(string, "text/html");
 
-  console.log(string);
-
   // Get the <head> element from the parsed document
   const parsedHead = htmlDoc.head;
 
