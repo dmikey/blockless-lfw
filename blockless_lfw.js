@@ -59,7 +59,7 @@ const wasi = new wasijs.default({
   bindings: { ...wasibrowserbindings.default, fs },
 });
 
-WebAssembly.compileStreaming(fetch("foo/build/foo.wasm"))
+WebAssembly.compileStreaming(fetch("site/.bls/site.wasm"))
   .then((wasm) => {
     return WebAssembly.instantiate(wasm, {
       wasi_snapshot_preview1: wasi.wasiImport,

@@ -1,0 +1,19 @@
+name = "site"
+version = "1.0.0"
+type = "site"
+content_type = "html"
+
+[deployment]
+nodes = 1
+
+[build]
+dir = ".bls"
+public_dir = "out"
+entry = "site_debug.wasm"
+command = "npm run build"
+
+[build_release]
+dir = ".bls"
+public_dir = "out"
+entry = "site.wasm"
+command = "npm run build"
